@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroSmart Monitor — Penyiram Tanaman Otomatis</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="layout.css">
+  <link rel="stylesheet" href="components.css">
+
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.3.4/mqtt.min.js" defer></script>
+
+  <!-- App Scripts -->
+  <script src="config.js" defer></script>
+  <script src="state.js" defer></script>
+  <script src="ui.js" defer></script>
+  <script src="charts.js" defer></script>
+  <script src="mqtt.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+
+<body>
+
+  <!-- NAVIGATION BAR -->
+  <nav>
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+          <path
+            d="M9 2C6.2 2 4.5 4.2 4.5 6.5c0 2.2 1.5 4 3.5 4.8V15h2v-3.7C11.9 10.5 13.5 8.7 13.5 6.5 13.5 4.2 11.8 2 9 2z" />
+        </svg>
+      </div>
+      AgroSmart Monitor
+    </div>
+
+    <div class="nav-tabs" role="tablist">
+      <button class="nav-tab active" onclick="goTo('dashboard',this)" role="tab">Dashboard</button>
+      <button class="nav-tab" onclick="goTo('riwayat',this)" role="tab">Riwayat</button>
+      <button class="nav-tab" onclick="goTo('tanaman',this)" role="tab">Tanaman</button>
+      <button class="nav-tab" onclick="goTo('tentang',this)" role="tab">Tentang</button>
+    </div>
+
+    <div class="status-badge connecting" id="navBadge" aria-live="polite">
+      <div class="pulse"></div>
+      <span id="navBadgeText">Menghubungkan…</span>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active" role="tabpanel">
+
+      <!-- Metric Cards -->
+      <div class="metrics">
+
+        <div class="metric-card mc-green">
+          <div class="mc-label">Kelembapan Tanah</div>
+          <div class="mc-value" id="valMoisture">—<span class="mc-unit">%</span></div>
+          <div class="mc-bar">
+            <div class="mc-fill" id="barMoisture" style="width:0%;background:var(--green-500)"></div>
+          </div>
+          <div class="mc-status" id="statusMoisture" style="color:var(--text-muted)">Menunggu data…</div>
+        </div>
+
+        <div class="metric-card mc-amber">
+          <div class="mc-label">Suhu Udara</div>
+          <div class="mc-value" id="valTemp">—<span class="mc-unit">°C</span></div>
+          <div class="mc-bar">
+            <div class="mc-fill" id="barTemp" style="width:0%;background:var(--amber)"></div>
+          </div>
+          <div class="mc-status" id="statusTemp" style="color:var(--text-muted)">Menunggu data…</div>
+        </div>
+
+        <div class="metric-card mc-blue">
+          <div class="mc-label">Penyiraman Hari Ini</div>
+          <div class="mc-value" id="valWatering">0<span class="mc-unit">×</span></div>
+          <div class="mc-bar">
+            <div class="mc-fill" id="barWatering" style="width:0%;background:var(--blue)"></div>
+          </div>
+          <div class="mc-status" id="statusWatering" style="color:var(--text-muted)">Belum ada penyiraman</div>
+        </div>
+
+      </div><!-- /metrics -->
+
+      <!-- Chart + Sidebar -->
+      <div class="content-grid">
+
+        <!-- Real-time Chart -->
+        <div>
+          <div class="panel">
+            <div class="chart-header">
+              <div>
+                <div class="panel-title">Grafik Kelembapan Tanah &amp; Suhu Udara — Real-Time</div>
+                <div class="chart-legend" style="margin-top:4px">
+                  <div class="legend-item">
+                    <div class="legend-line" style="background:var(--green-500)"></div>
+                    Kelembapan Tanah
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-line" style="background:var(--amber)"></div>
+                    Suhu Udara
+                  </div>
+                </div>
+              </div>
+              <div class="mqtt-badge connecting" id="mqttBadge" aria-live="polite">
+                <div class="mqtt-dot"></div>
+                <span id="mqttBadgeText">MQTT…</span>
+              </div>
+            </div>
+            <div class="live-ticker">
+              <span class="ticker-label">Update terakhir:</span>
+              <span id="lastUpdateTime">—</span>
+            </div>
+            <div style="position:relative;height:240px">
+              <canvas id="mainChart" role="img" aria-label="Grafik kelembapan tanah dan suhu udara real-time"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+
+          <!-- Status Pompa -->
+          <div class="panel">
+            <div class="panel-title">Status Pompa Air</div>
+            <div class="pump-section">
+              <div class="pump-ring pump-off" id="pumpRing" aria-live="polite">
+                <span id="pumpLabel">STANDBY</span>
+              </div>
+              <div class="pump-stats">
+                <div class="pump-count"><span id="pumpCount">0</span>×</div>
+                <div class="pump-note">siram hari ini</div>
+                <div class="pump-note" id="lastWaterTime"
+                  style="margin-top:4px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text-secondary)">
+                  Belum ada
+                </div>
+              </div>
+            </div>
+            <div class="alert alert-ok" id="pumpAlert">
+              <span class="alert-icon">🌿</span>
+              <span id="pumpAlertText">Menunggu data sensor…</span>
+            </div>
+          </div>
+
+          <!-- Kondisi Sensor -->
+          <div class="panel">
+            <div class="panel-title">Kondisi Sensor Saat Ini</div>
+            <div class="gauge-row">
+              <div class="gauge-label">Kel. Tanah</div>
+              <div class="gauge-track">
+                <div class="gauge-fill" id="gaugeMoisture" style="width:0%;background:var(--green-500)"></div>
+              </div>
+              <div class="gauge-val" id="gaugeValMoisture">—%</div>
+            </div>
+            <div class="gauge-row">
+              <div class="gauge-label">Suhu Udara</div>
+              <div class="gauge-track">
+                <div class="gauge-fill" id="gaugeTemp" style="width:0%;background:var(--amber)"></div>
+              </div>
+              <div class="gauge-val" id="gaugeValTemp">—°C</div>
+            </div>
+          </div>
+
+          <!-- Log Aktivitas -->
+          <div class="panel">
+            <div class="panel-title">Log Aktivitas MQTT</div>
+            <div class="log-list" id="logList" aria-live="polite">
+              <div class="log-item">
+                <div class="log-time">—</div>
+                <div class="log-dot" style="background:var(--text-muted)"></div>
+                <div class="log-text" style="color:var(--text-muted)">Menunggu koneksi MQTT…</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /sidebar -->
+      </div><!-- /content-grid -->
+    </div><!-- /page-dashboard -->
+
+
+    <!-- ── RIWAYAT ── -->
+    <div id="page-riwayat" class="page" role="tabpanel">
+
+      <!-- Header row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-size:15px;font-weight:600;color:var(--text-primary);letter-spacing:-.3px">Riwayat 7 Hari
+            Terakhir</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Data tersimpan otomatis di browser ·
+            diperbarui setiap menit</div>
+        </div>
+        <button onclick="clearWeeklyData()"
+          style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid rgba(192,57,43,.3);background:var(--red-light);color:var(--red);font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;transition:opacity .15s"
+          onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+          🗑 Reset Data
+        </button>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="hist-stats">
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--green-600)" id="avgMoistureStat">—%</div>
+          <div class="stat-label">Rata-rata Kelembapan 7 Hari</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--amber)" id="avgTempStat">—°C</div>
+          <div class="stat-label">Rata-rata Suhu 7 Hari</div>
+        </div>
+      </div>
+
+      <!-- Chart: Kelembapan 7 hari -->
+      <div class="panel" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="panel-title" style="margin-bottom:0">Kelembapan Tanah — 7 Hari Terakhir</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-muted)">
+            <span
+              style="width:16px;height:3px;background:var(--green-500);display:inline-block;border-radius:2px"></span>
+            Per hari (rata-rata)
+          </div>
+        </div>
+        <div style="position:relative;height:200px">
+          <canvas id="histChart1" aria-label="Riwayat kelembapan tanah 7 hari"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart: Suhu 7 hari -->
+      <div class="panel" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="panel-title" style="margin-bottom:0">Suhu Udara — 7 Hari Terakhir</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-muted)">
+            <span style="width:16px;height:3px;background:var(--amber);display:inline-block;border-radius:2px"></span>
+            Per hari (rata-rata)
+          </div>
+        </div>
+        <div style="position:relative;height:200px">
+          <canvas id="histChart2" aria-label="Riwayat suhu udara 7 hari"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart: Penyiraman per hari -->
+      <div class="panel">
+        <div class="panel-title">Jumlah Penyiraman per Hari — 7 Hari Terakhir</div>
+        <div style="position:relative;height:160px">
+          <canvas id="histChart3" aria-label="Jumlah penyiraman otomatis 7 hari"></canvas>
+        </div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:8px;text-align:center">
+          Tanggal/Bulan
+        </div>
+      </div>
+
+    </div><!-- /page-riwayat -->
+
+
+    <!-- ── TANAMAN ── -->
+    <div id="page-tanaman" class="page" role="tabpanel">
+      <div class="plant-grid">
+
+        <div class="panel">
+          <div class="plant-icon">🌱</div>
+          <span class="tag tag-ok">Kondisi Baik</span>
+          <div class="panel-title">Tanaman yang Dipantau</div>
+          <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:14px">
+            Sensor terpasang pada media tanam pot berukuran sedang (10×10 cm) di area greenhouse
+            Analisis Kualitas Lingkungan dan Teknologi Kesehatan Lingkungan.
+          </p>
+          <div class="gauge-row">
+            <div class="gauge-label">Kel. ideal</div>
+            <div class="gauge-track" style="background:var(--green-100)">
+              <div class="gauge-fill" style="width:65%;background:var(--green-400)"></div>
+            </div>
+            <div class="gauge-val" style="color:var(--green-700)">30–80%</div>
+          </div>
+          <div class="gauge-row">
+            <div class="gauge-label">Suhu ideal</div>
+            <div class="gauge-track" style="background:var(--amber-light)">
+              <div class="gauge-fill" style="width:50%;background:var(--amber)"></div>
+            </div>
+            <div class="gauge-val" style="color:var(--amber-dark)">22–32°C</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Cara Kerja Sistem</div>
+          <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">
+            Sensor membaca kondisi tanah setiap 5 detik. Jika kelembapan di bawah batas minimum,
+            mikrokontroler mengaktifkan pompa air secara otomatis melalui relay.
+          </p>
+          <div class="flow-steps">
+            <div class="flow-step">📡 Sensor<br>baca data</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">🔧 Proses<br>MCU</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">💧 Pompa<br>ON/OFF</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">📡 MQTT<br>publish</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">🌐 Update<br>web</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Komponen Alat</div>
+          <div class="component-list">
+            <div class="comp-item">
+              <div class="comp-dot" style="background:var(--green-500)"></div><b>Sensor Kelembapan:</b>&nbsp;Capacitive
+              soil moisture sensor
+            </div>
+            <div class="comp-item">
+              <div class="comp-dot" style="background:var(--amber)"></div><b>Sensor Suhu:</b>&nbsp;DHT22
+            </div>
+            <div class="comp-item">
+              <div class="comp-dot" style="background:var(--blue)"></div><b>Mikrokontroler:</b>&nbsp;ESP32 + WiFi
+            </div>
+            <div class="comp-item">
+              <div class="comp-dot" style="background:var(--teal)"></div><b>Aktuator:</b>&nbsp;Pompa air mini + relay
+              module
+            </div>
+            <div class="comp-item">
+              <div class="comp-dot" style="background:#9B59B6"></div><b>Display:</b>&nbsp;Web dashboard real-time via
+              MQTT
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Tips Perawatan Sensor</div>
+          <ul class="tip-list">
+            <li>Tanamkan sensor minimal 5 cm ke dalam tanah agar pembacaan akurat.</li>
+            <li>Hindari sinar matahari langsung pada sensor suhu DHT22.</li>
+            <li>Bersihkan ujung sensor setiap 2 minggu agar tidak ada kerak tanah.</li>
+            <li>Pastikan koneksi kabel aman dari air saat pompa aktif.</li>
+            <li>Kalibrasi sensor setiap bulan dengan membandingkan hasil manual.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div><!-- /page-tanaman -->
+
+
+    <!-- ── TENTANG ── -->
+    <div id="page-tentang" class="page" role="tabpanel">
+
+      <div class="about-header">
+        <div class="about-title">🌿 lembap.in</div>
+        <div class="about-desc">
+          Analisis Kualitas Lingkungan dan Teknologi Kesehatan Lingkungan — sistem cerdas yang memantau kelembapan
+          tanah dan suhu secara real-time, mengaktifkan pompa air otomatis saat dibutuhkan,
+          dan menampilkan semua data melalui web dashboard interaktif via MQTT broker.
+        </div>
+      </div>
+
+      <div class="section-label">Anggota Kelompok</div>
+      <div class="team-grid" style="margin-bottom:20px">
+        <div class="team-card">
+          <div class="avatar av1">1</div>
+          <div class="team-name">Alfianti Suci N</div>
+          <div class="team-role">240612610506</div>
+        </div>
+        <div class="team-card">
+          <div class="avatar av2">2</div>
+          <div class="team-name">Junaida Afryanti</div>
+          <div class="team-role">240612610503</div>
+        </div>
+        <div class="team-card">
+          <div class="avatar av3">3</div>
+          <div class="team-name">Nazwa Syafira</div>
+          <div class="team-role">240612610188</div>
+        </div>
+        <div class="team-card">
+          <div class="avatar av4">4</div>
+          <div class="team-name">Raisa Talitha P</div>
+          <div class="team-role">240612608212</div>
+        </div>
+        <div class="team-card">
+          <div class="avatar av5">5</div>
+          <div class="team-name">Revinda Laudya P</div>
+          <div class="team-role">240612600068</div>
+        </div>
+      </div>
+
+      <div class="section-label">Manfaat Teknologi</div>
+      <div class="benefit-grid">
+        <div class="benefit-card">
+          <div class="benefit-num">~40%</div>
+          <div class="benefit-desc">Penghematan air dibanding penyiraman manual konvensional setiap hari.</div>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-num">24/7</div>
+          <div class="benefit-desc">Pemantauan non-stop tanpa perlu kehadiran manusia secara fisik.</div>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-num">Real-time</div>
+          <div class="benefit-desc">Data bisa dilihat kapan saja melalui web dashboard secara real time.</div>
+        </div>
+      </div>
+
+    </div><!-- /page-tentang -->
+
+  </main>
+
+</body>
+
+</html>

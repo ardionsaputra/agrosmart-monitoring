@@ -1,0 +1,249 @@
+/* layout.css — AgroSmart Monitor
+   Navigation, Main Container, Page Grid, Sidebar */
+
+/* ── Navigation ── */
+nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 58px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--green-800);
+  letter-spacing: -0.3px;
+  user-select: none;
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--green-600), var(--green-400));
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.brand-icon svg {
+  fill: white;
+}
+
+/* ── Nav Tabs ── */
+.nav-tabs {
+  display: flex;
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.nav-tab {
+  padding: 6px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  border: none;
+  background: transparent;
+  font-family: inherit;
+}
+
+.nav-tab:hover {
+  color: var(--green-700);
+}
+
+.nav-tab.active {
+  background: var(--surface);
+  color: var(--green-800);
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Status Badge ── */
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--green-700);
+  background: var(--green-100);
+  border: 1px solid var(--green-300);
+  border-radius: 20px;
+  padding: 5px 13px;
+  transition: all var(--transition-normal);
+}
+
+.status-badge.offline {
+  color: var(--red);
+  background: var(--red-light);
+  border-color: rgba(192, 57, 43, 0.3);
+}
+
+.status-badge.offline .pulse {
+  background: var(--red);
+}
+
+.status-badge.connecting {
+  color: var(--amber-dark);
+  background: var(--amber-light);
+  border-color: rgba(233, 160, 18, 0.3);
+}
+
+.status-badge.connecting .pulse {
+  background: var(--amber);
+}
+
+.pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-500);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+/* ── Main Container ── */
+main {
+  flex: 1;
+  padding: 24px 28px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Page Sections ── */
+.page {
+  display: none;
+  animation: fadein var(--transition-normal);
+}
+
+.page.active {
+  display: block;
+}
+
+/* ── Content Grid (chart + sidebar) ── */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 290px;
+  gap: 16px;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Generic Panel ── */
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 18px;
+  transition: box-shadow var(--transition-fast);
+}
+
+.panel:hover {
+  box-shadow: 0 2px 12px rgba(39, 105, 31, 0.07);
+}
+
+.panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  letter-spacing: -0.2px;
+}
+
+/* ── Metric Cards Grid ── */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* ── History Page Layout ── */
+.hist-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.hist-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+/* ── Plant Page Layout ── */
+.plant-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ── About Page Layout ── */
+.about-header {
+  background: linear-gradient(135deg, var(--green-800), var(--green-600));
+  border-radius: var(--radius);
+  padding: 28px;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.about-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.about-desc {
+  font-size: 13px;
+  opacity: 0.85;
+  line-height: 1.7;
+  max-width: 560px;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}

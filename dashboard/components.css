@@ -1,0 +1,121 @@
+/* components.css — AgroSmart Monitor
+   Metric Cards, Gauges, Pump, Chart, Log, Alert, About */
+
+/* ── Metric Card ── */
+.metric-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 16px 18px;
+  transition: box-shadow var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+.metric-card:hover { box-shadow: 0 4px 16px rgba(39,105,31,0.10); }
+.metric-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:var(--radius) var(--radius) 0 0; }
+.mc-green::before { background: linear-gradient(90deg, var(--green-500), var(--green-400)); }
+.mc-amber::before { background: linear-gradient(90deg, var(--amber), #F5C842); }
+.mc-blue::before  { background: linear-gradient(90deg, var(--blue), #3B9DE8); }
+.mc-label { font-size:11px; color:var(--text-muted); font-weight:500; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.mc-value { font-size:30px; font-weight:600; color:var(--text-primary); line-height:1; letter-spacing:-1px; transition:color .4s; }
+.mc-unit  { font-size:14px; font-weight:400; color:var(--text-secondary); }
+.mc-bar   { height:4px; border-radius:2px; margin-top:12px; background:var(--surface2); overflow:hidden; }
+.mc-fill  { height:100%; border-radius:2px; transition:width 1s ease; }
+.mc-status{ font-size:11px; margin-top:6px; font-weight:500; }
+
+/* ── Chart Header ── */
+.chart-header  { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.chart-legend  { display:flex; gap:16px; }
+.legend-item   { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary); }
+.legend-line   { width:20px; height:3px; border-radius:2px; flex-shrink:0; }
+
+/* ── MQTT Badge ── */
+.mqtt-badge {
+  display:flex; align-items:center; gap:5px;
+  font-size:10px; font-family:'DM Mono',monospace; font-weight:500;
+  padding:3px 9px; border-radius:20px;
+  color:var(--green-700); background:var(--green-100); border:1px solid var(--green-300);
+  transition:all var(--transition-normal);
+}
+.mqtt-badge.offline    { color:var(--red);        background:var(--red-light);   border-color:rgba(192,57,43,.25); }
+.mqtt-badge.connecting { color:var(--amber-dark);  background:var(--amber-light); border-color:rgba(233,160,18,.3); }
+.mqtt-dot { width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
+
+/* ── Live Ticker ── */
+.live-ticker  { display:flex; gap:8px; align-items:center; font-size:11px; color:var(--text-muted); margin-bottom:6px; }
+.ticker-label { font-family:'DM Mono',monospace; }
+
+/* ── Pump Status ── */
+.pump-section { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.pump-ring {
+  width:62px; height:62px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-size:10px; font-weight:600; letter-spacing:.3px;
+  border:2px solid; transition:all var(--transition-slow); flex-shrink:0;
+}
+.pump-off { background:var(--surface2); border-color:var(--border); color:var(--text-muted); }
+.pump-on  { background:var(--green-100); border-color:var(--green-400); color:var(--green-800); animation:pumpPulse 1.4s ease-in-out infinite; }
+.pump-stats { text-align:right; }
+.pump-count { font-size:24px; font-weight:600; color:var(--text-primary); letter-spacing:-.5px; }
+.pump-note  { font-size:11px; color:var(--text-muted); margin-top:2px; }
+
+/* ── Gauge Bars ── */
+.gauge-row   { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+.gauge-row:last-child { margin-bottom:0; }
+.gauge-label { font-size:11px; color:var(--text-secondary); width:72px; flex-shrink:0; }
+.gauge-track { flex:1; height:6px; border-radius:3px; background:var(--surface2); overflow:hidden; }
+.gauge-fill  { height:100%; border-radius:3px; transition:width 1s ease; }
+.gauge-val   { font-size:11px; font-weight:600; color:var(--text-primary); width:40px; text-align:right; font-family:'DM Mono',monospace; }
+
+/* ── Alert Box ── */
+.alert      { display:flex; align-items:flex-start; gap:8px; padding:9px 11px; border-radius:8px; font-size:11px; line-height:1.5; margin-top:10px; }
+.alert-ok   { background:var(--green-50);    color:var(--green-800); border:1px solid var(--green-200); }
+.alert-warn { background:var(--amber-light); color:var(--amber-dark); border:1px solid rgba(233,160,18,.3); }
+.alert-dry  { background:var(--red-light);   color:var(--red);       border:1px solid rgba(192,57,43,.2); }
+.alert-icon { font-size:13px; flex-shrink:0; margin-top:1px; }
+
+/* ── Activity Log ── */
+.log-list { max-height:190px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--green-200) transparent; }
+.log-list::-webkit-scrollbar       { width:4px; }
+.log-list::-webkit-scrollbar-track { background:transparent; }
+.log-list::-webkit-scrollbar-thumb { background:var(--green-200); border-radius:2px; }
+.log-item        { display:flex; align-items:flex-start; gap:9px; padding:7px 0; border-bottom:1px solid var(--border); }
+.log-item:last-child { border:none; padding-bottom:0; }
+.log-time { font-size:10px; font-family:'DM Mono',monospace; color:var(--text-muted); min-width:38px; margin-top:2px; flex-shrink:0; }
+.log-dot  { width:7px; height:7px; border-radius:50%; margin-top:3px; flex-shrink:0; }
+.log-text { font-size:11px; color:var(--text-primary); line-height:1.5; }
+
+/* ── Stat Card ── */
+.stat-card  { background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); padding:14px 16px; text-align:center; }
+.stat-val   { font-size:22px; font-weight:600; color:var(--text-primary); letter-spacing:-.5px; }
+.stat-label { font-size:11px; color:var(--text-muted); margin-top:4px; }
+
+/* ── Plant page ── */
+.plant-icon { font-size:36px; margin-bottom:10px; }
+.tag      { display:inline-block; padding:3px 9px; border-radius:20px; font-size:10px; font-weight:600; margin-bottom:8px; text-transform:uppercase; letter-spacing:.4px; }
+.tag-ok   { background:var(--green-100); color:var(--green-800); }
+.tag-info { background:var(--blue-light); color:var(--blue-dark); }
+.flow-steps { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; align-items:center; }
+.flow-step  { background:var(--green-50); border:1px solid var(--green-200); border-radius:7px; padding:7px 11px; font-size:11px; font-weight:500; color:var(--green-800); text-align:center; line-height:1.5; }
+.flow-arrow { color:var(--green-400); font-size:16px; font-weight:300; }
+.component-list { display:flex; flex-direction:column; gap:7px; margin-top:4px; }
+.comp-item { display:flex; align-items:center; gap:9px; padding:8px 11px; background:var(--surface2); border-radius:var(--radius-sm); font-size:12px; }
+.comp-dot  { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.tip-list    { list-style:none; display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+.tip-list li { font-size:12px; color:var(--text-secondary); line-height:1.5; padding-left:14px; position:relative; }
+.tip-list li::before { content:'→'; position:absolute; left:0; color:var(--green-400); }
+
+/* ── About page ── */
+.team-card  { background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); padding:16px 12px; text-align:center; transition:box-shadow var(--transition-fast); }
+.team-card:hover { box-shadow:0 4px 12px rgba(39,105,31,.08); }
+.avatar  { width:44px; height:44px; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:600; }
+.av1 { background:var(--blue-light);  color:var(--blue-dark); }
+.av2 { background:var(--green-100);   color:var(--green-800); }
+.av3 { background:#EEEDFE;            color:#534AB7; }
+.av4 { background:#FAECE7;            color:#993C1D; }
+.av5 { background:var(--amber-light); color:var(--amber-dark); }
+.team-name   { font-size:12px; font-weight:500; color:var(--text-primary); }
+.team-role   { font-size:10px; color:var(--text-muted); margin-top:3px; }
+.benefit-card{ background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); padding:16px; }
+.benefit-num { font-size:24px; font-weight:600; color:var(--green-600); letter-spacing:-.5px; }
+.benefit-desc{ font-size:11px; color:var(--text-secondary); margin-top:4px; line-height:1.5; }

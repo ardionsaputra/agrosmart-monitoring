@@ -1,0 +1,99 @@
+/* base.css — AgroSmart Monitor */
+
+/* ── Design Tokens ── */
+:root {
+  /* Green scale */
+  --green-900: #0D2B0A;
+  --green-800: #1A4A14;
+  --green-700: #27691F;
+  --green-600: #338829;
+  --green-500: #3FA733;
+  --green-400: #6DC063;
+  --green-300: #9BD393;
+  --green-200: #C8E8C4;
+  --green-100: #E8F5E6;
+  --green-50:  #F3FAF2;
+
+  /* Semantic accent colors */
+  --amber:       #E9A012;
+  --amber-light: #FDF3DC;
+  --amber-dark:  #7A5200;
+
+  --blue:        #1A6FB5;
+  --blue-light:  #E4F0FB;
+  --blue-dark:   #0A3D6B;
+
+  --teal:        #0F8A6E;
+  --teal-light:  #E0F5F0;
+
+  --red:         #C0392B;
+  --red-light:   #FDECEA;
+
+  /* Surface & text */
+  --bg:             #F5F7F4;
+  --surface:        #FFFFFF;
+  --surface2:       #F0F4EF;
+  --border:         rgba(39, 105, 31, 0.12);
+  --text-primary:   #0D2B0A;
+  --text-secondary: #4A6845;
+  --text-muted:     #7A9875;
+
+  /* Shape */
+  --radius:    12px;
+  --radius-sm: 7px;
+
+  /* Transitions */
+  --transition-fast:   0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow:   0.5s ease;
+}
+
+/* ── Reset ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ── */
+html {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Animations ── */
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+@keyframes pumpPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(63, 167, 51, 0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(63, 167, 51, 0); }
+}
+
+@keyframes valueFlash {
+  0%   { color: var(--green-600); }
+  100% { color: inherit; }
+}
+
+/* ── Utility ── */
+.flash {
+  animation: valueFlash 0.6s ease;
+}

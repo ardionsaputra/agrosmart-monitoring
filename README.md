@@ -105,19 +105,19 @@ smart-irrigation-iot/
 
 ### Main Dashboard
 
-![Dashboard](../docs/dashboard.jpeg)
+![Dashboard](docs/dashboard.jpeg)
 
 ### History Page
 
-![History](../docs/riwayat.jpeg)
+![History](docs/riwayat.jpeg)
 
 ### Plant Monitoring
 
-![Plant Monitoring](../docs/tanaman.jpeg)
+![Plant Monitoring](docs/tanaman.jpeg)
 
 ### About Page
 
-![About](../docs/tentang.jpeg)
+![About](docs/tentang.jpeg)
 
 ---
 
